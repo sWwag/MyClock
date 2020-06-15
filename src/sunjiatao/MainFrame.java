@@ -32,10 +32,9 @@ public class MainFrame extends JFrame
     private final String[][] str= new String[100][2];
 
     static Player player = null;
-    private final String path ="D://MyClock//时间记录.txt";
-    private final String music ="D://MyClock//大鱼.txt";
+    private final String path ="D:\\MyClock\\时间记录.txt";
+    private final String music ="D:\\MyClock\\大鱼.mp3";
 
-    private Graphics g=null;
     //ctor
     public MainFrame()
     {
@@ -87,12 +86,24 @@ public class MainFrame extends JFrame
             //System.out.println("sjthhh");
         }
     }
-    //闹钟响起提示
-    public void play() throws FileNotFoundException, JavaLayerException
+
+    public void play()
     {
-        BufferedInputStream buffer = new BufferedInputStream(new FileInputStream(music));
-        player = new Player(buffer);
-        player.play();
+        new Thread(() ->
+        {
+            try {
+                File file = new File(music);
+                FileInputStream fis = new FileInputStream(file);
+                BufferedInputStream stream = new BufferedInputStream(fis);
+                player = new Player(stream);
+                player.play();
+                Thread.sleep(5000);
+                player.close();
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+        }).start();
+
     }
     //弹窗提醒
     public void prompt()
@@ -101,40 +112,28 @@ public class MainFrame extends JFrame
         int a, b;
         a = now1.get(Calendar.HOUR_OF_DAY);
         b = now1.get(Calendar.MINUTE);
-        try (FileReader reader = new FileReader(path);
-             BufferedReader br = new BufferedReader(reader))
+
+        try (FileReader reader = new FileReader(path); BufferedReader br = new BufferedReader(reader))
         {
             String line;
             String[][] str= new String[100][2];
             int i =0;
-            while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null)
+            {
                 int j =0;
-                StringTokenizer st = new StringTokenizer(line, ":");
+                StringTokenizer st = new StringTokenizer(line,":");
                 while (st.hasMoreTokens())
                 {
                     str[i][j]=st.nextToken();
                     j++;
                 }
-                if (a==Integer.valueOf(str[i][0]) && b==Integer.valueOf(str[i][1]))
+                if (a==Integer.parseInt(str[i][0]) && b==Integer.parseInt(str[i][1]))
                 {
                     if(checkBox.isSelected())
                     {
-                        try
-                        {
-                            File file = new File(music);
-                            FileInputStream fis = new FileInputStream(file);
-                            BufferedInputStream stream = new BufferedInputStream(fis);
-                            Player player = new Player(stream);
-                            player.play();
-                            JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
-                        }
-                        catch (FileNotFoundException e)
-                        {
-                            System.out.print("FileNotFoundException ");
-                        } catch (JavaLayerException e)
-                        {
-                            e.printStackTrace();
-                        }
+                        play();
+                        JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
+                        //player.close();
                     }
                     else
                     {
@@ -151,14 +150,10 @@ public class MainFrame extends JFrame
         }
     }
     //闹钟显现
-    public void paintClock(Graphics g)
-    {
-
-    }
-
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+
         g.setColor(Color.BLACK);//画笔颜色
         int x = 100;
         int y = 100;
@@ -200,7 +195,7 @@ public class MainFrame extends JFrame
         a=now1.get(Calendar.HOUR_OF_DAY);
         b = now1.get(Calendar.MINUTE);
         c = now1.get(Calendar.SECOND);
-        g.drawString(a + ":" + b + ":" + c, 175, 330);
+        g.drawString(String.format("%02d",a) + ":" + String.format("%02d",b) + ":" + String.format("%02d",c), 175, 330);
         g.drawString("全部闹钟：",100,350);
         try (FileReader reader = new FileReader(path);
              BufferedReader br = new BufferedReader(reader)) // 建立一个对象，它把文件内容转成计算机能读懂的语言
@@ -218,9 +213,9 @@ public class MainFrame extends JFrame
                     j++;
                 }
                 g.drawString(str[i][0]+":"+str[i][1]+"\n",180+(i/10)*70,350+15*(i-(i/10)*10));
-                addClockButton.setText(str[i][0]+":"+str[i][1]+"\n");
-                System.out.print(str[i][0]+":"+str[i][1]);
-                System.out.println();
+                //addClockButton.setText(str[i][0]+":"+str[i][1]+"\n");
+                //System.out.print(str[i][0]+":"+str[i][1]);
+                //System.out.println();
                 i++;
                 j = 0;
             }
@@ -256,8 +251,8 @@ public class MainFrame extends JFrame
                     str[i][j]=st.nextToken();
                     j++;
                 }
-                System.out.print(str[i][0]+":"+str[i][1]);
-                System.out.println();
+                //System.out.print(str[i][0]+":"+str[i][1]);
+                //System.out.println();
                 i++;
                 j=0;
             }
@@ -275,7 +270,7 @@ public class MainFrame extends JFrame
         try(FileWriter writer =new FileWriter(path,true);
             BufferedWriter out =new BufferedWriter(writer))
         {
-            out.write(HOUR + ":" + MIN + "\r\n");
+            out.write(String.format("%02d",HOUR) + ":" + String.format("%02d",MIN) + "\r\n");
             out.flush();
             System.out.println("had added");
             JOptionPane.showMessageDialog(null,"闹钟添加成功！","添加闹钟提醒",JOptionPane.INFORMATION_MESSAGE);
@@ -367,9 +362,4 @@ public class MainFrame extends JFrame
         this.add(panel);
     }
 
-    @Override
-    public void paintComponents(Graphics g) {
-        super.paintComponents(g);
-        this.g=g;
-    }
 }
