@@ -6,14 +6,17 @@ import javazoom.jl.player.Player;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 
+
 @SuppressWarnings("SpellCheckingInspection")
-public class MainFrame extends JFrame  implements Runnable {
-    //变量
+public class MainFrame extends JFrame
+{
     private static final int DEFAULT_WIDTH = 400;
     private static final int DEFAULT_HEIGHT = 600;
 
@@ -32,43 +35,21 @@ public class MainFrame extends JFrame  implements Runnable {
     private final String path ="D://MyClock//时间记录.txt";
     private final String music ="D://MyClock//大鱼.txt";
 
+    private Graphics g=null;
     //ctor
     public MainFrame()
     {
         setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("闹钟");
+        setIcon();
 
         compositeControls();
         getTime();
         setVisible(true);
         setLocation(500,200);
-    }
-    //设置图标
-    public void setIcon()
-    {
-        try
-        {
-            Image img = ImageIO.read(this.getClass().getResource("闹钟.jpg"));
-            this.setIconImage(img);
-        }
-        catch (IOException e)
-        {
-            //System.out.println("sjthhh");
-        }
-    }
-    //线程
-    public void run()
-    {
-        while (true)
-        {
-            try
-            {
-                Thread.sleep(1000);// 间隔一秒
-            }
-            catch (Exception ex)
-            {
-            }
+
+        Timer timer =new Timer(1000, e -> {
             s += 6;                // 秒针每次走6°
             if (s >= 360)
             {
@@ -86,8 +67,24 @@ public class MainFrame extends JFrame  implements Runnable {
                     h = 0;                // 时针归零
                 }
             }
-            this.repaint();     // 重新绘制
-            this.prompt();       //将闹钟加入到线程当中
+            //paintClock(g);
+            repaint();     // 重新绘制
+            prompt();       //将闹钟加入到线程当中
+            System.out.println("111");
+        });
+        timer.start();
+    }
+    //设置图标
+    private void setIcon()
+    {
+        try
+        {
+            Image img = ImageIO.read(this.getClass().getResource("闹钟.jpg"));
+            this.setIconImage(img);
+        }
+        catch (IOException e)
+        {
+            //System.out.println("sjthhh");
         }
     }
     //闹钟响起提示
@@ -156,6 +153,11 @@ public class MainFrame extends JFrame  implements Runnable {
     //闹钟显现
     public void paintClock(Graphics g)
     {
+
+    }
+
+    @Override
+    public void paint(Graphics g) {
         super.paint(g);
         g.setColor(Color.BLACK);//画笔颜色
         int x = 100;
@@ -215,7 +217,7 @@ public class MainFrame extends JFrame  implements Runnable {
                     str[i][j]=st.nextToken();
                     j++;
                 }
-                g.drawString(str[i][0]+":"+str[i][1]+"\n",180+(i/10)*70,350+15*(i-(i/10)*10));  
+                g.drawString(str[i][0]+":"+str[i][1]+"\n",180+(i/10)*70,350+15*(i-(i/10)*10));
                 addClockButton.setText(str[i][0]+":"+str[i][1]+"\n");
                 System.out.print(str[i][0]+":"+str[i][1]);
                 System.out.println();
@@ -228,6 +230,7 @@ public class MainFrame extends JFrame  implements Runnable {
             z.printStackTrace();
         }
     }
+
     //初始化
     public void getTime()
     {
@@ -235,8 +238,6 @@ public class MainFrame extends JFrame  implements Runnable {
         s=now.get(Calendar.HOUR_OF_DAY)*6;
         m = now.get(Calendar.MINUTE) * 6;
         h = now.get(Calendar.HOUR) * 30 + now.get(Calendar.MINUTE) / 12 * 6;
-        Thread t=new Thread(this);
-        t.start();
     }
     //文件读取
     public void getClocksFromFile()
@@ -296,9 +297,8 @@ public class MainFrame extends JFrame  implements Runnable {
             getClocksFromFile();
             for (int i = 0; i < 100; i++)
             {
-                if (Integer.valueOf(str[i][0])==HOUR && Integer.valueOf(str[i][1])==MIN)
+                if (Integer.parseInt(str[i][0])==HOUR && Integer.parseInt(str[i][1])==MIN)
                 {
-                    continue;
                 }
                 else
                 {
@@ -316,9 +316,8 @@ public class MainFrame extends JFrame  implements Runnable {
             System.out.println("had deleted");
             JOptionPane.showMessageDialog(null,"该闹钟已删除！","删除闹钟提醒",JOptionPane.INFORMATION_MESSAGE);
         }
-
     }
-    //添加控件
+    //绘制控件
     public void compositeControls()
     {
         JPanel panel=new JPanel();
@@ -366,5 +365,11 @@ public class MainFrame extends JFrame  implements Runnable {
         panel.add(checkBox);
         panel.validate();
         this.add(panel);
+    }
+
+    @Override
+    public void paintComponents(Graphics g) {
+        super.paintComponents(g);
+        this.g=g;
     }
 }
