@@ -154,24 +154,27 @@ public class MainFrame extends JFrame
     public void paint(Graphics g) {
         super.paint(g);
 
-        g.setColor(Color.BLACK);//画笔颜色
+        g.setColor(Color.black);//画笔颜色
+        Graphics2D g2=(Graphics2D)g;
+        g2.setColor(Color.black);
         int x = 100;
         int y = 100;
         int r = 100;
-        g.drawOval(x, y, r * 2, r * 2);
+        g2.drawOval(x, y, r * 2, r * 2);
         // 秒针
         double rad = Math.PI / 180;
         int x1 = (int) (90 * Math.sin(rad * s));
         int y1 = (int) (90 * Math.cos(rad * s));
-        g.drawLine(r + x, r + y, r + x + x1, r + y - y1);/* drawLine(a,b,c,d) (a,b)为起始坐标 (c,d)为终点坐标 */
+        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);/* drawLine(a,b,c,d) (a,b)为起始坐标 (c,d)为终点坐标 */
         // 分针
         x1 = (int) (80 * Math.sin(rad * m));
         y1 = (int) (80 * Math.cos(rad * m));
-        g.drawLine(r + x, r + y, r + x + x1, r + y - y1);
+        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);
         // 时针
         x1 = (int) (60 * Math.sin(rad * h));
         y1 = (int) (60 * Math.cos(rad * h));
-        g.drawLine(r + x, r + y, r + x + x1, r + y - y1);
+        g2.setStroke(new BasicStroke(2.0f));
+        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);
         // 画数字
         int d = 30;
         for (int i = 1; i <= 12; i++)
@@ -179,6 +182,7 @@ public class MainFrame extends JFrame
             x1 = (int) ((r - 10) * Math.sin(rad * d));
             y1 = (int) ((r - 10) * Math.cos(rad * d));
             g.drawString(String.valueOf(i), r + x + x1, r + y - y1);    //字符型的数据才能画
+            d+=30;
         }
         // 画刻度
         d = 0;
@@ -186,17 +190,17 @@ public class MainFrame extends JFrame
         {
             x1 = (int) ((r - 2) * Math.sin(rad * d));
             y1 = (int) ((r - 2) * Math.cos(rad * d));
-            g.drawString(".", r + x + x1, r + y - y1);      //画的是点，表示刻度
+            g2.drawString(".", r + x + x1, r + y - y1);      //画的是点，表示刻度
             d += 6;
         }
         //获取时间
         Calendar now1 = new GregorianCalendar();
         int a,b,c;
-        a=now1.get(Calendar.HOUR_OF_DAY);
+        a = now1.get(Calendar.HOUR_OF_DAY);
         b = now1.get(Calendar.MINUTE);
         c = now1.get(Calendar.SECOND);
-        g.drawString(String.format("%02d",a) + ":" + String.format("%02d",b) + ":" + String.format("%02d",c), 175, 330);
-        g.drawString("全部闹钟：",100,350);
+        g2.drawString(String.format("%02d",a) + ":" + String.format("%02d",b) + ":" + String.format("%02d",c), 175, 330);
+        g2.drawString("全部闹钟：",100,350);
         try (FileReader reader = new FileReader(path);
              BufferedReader br = new BufferedReader(reader)) // 建立一个对象，它把文件内容转成计算机能读懂的语言
         {
