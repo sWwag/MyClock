@@ -43,12 +43,12 @@ public class MainFrame extends JFrame
         setTitle("闹钟");
         setIcon();
         compositeControls();
-        getTime();
+        //getTime();
         setVisible(true);
         setLocation(500,200);
 
         Timer timer =new Timer(1000, e -> {
-            //getTime();
+            getTime();
             s += 6;                // 秒针每次走6°
             if (s >= 360)
             {
@@ -242,7 +242,7 @@ public class MainFrame extends JFrame
     public void getTime()
     {
         Calendar now =new GregorianCalendar();
-        s=now.get(Calendar.SECOND)*6;
+        s = (now.get(Calendar.SECOND)-1)*6;
         m = now.get(Calendar.MINUTE) * 6;
         h = now.get(Calendar.HOUR) * 30 + now.get(Calendar.MINUTE) / 12 * 6;
 
