@@ -210,11 +210,20 @@ public class MainFrame extends JFrame
 
         // 画刻度
         d = 0;
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 60; i++)
+        {
             x1 = (int) ((r - 2) * Math.sin(rad * d));
             y1 = (int) ((r - 2) * Math.cos(rad * d));
-            g.drawString(".", r+x + x1, r +y- y1);
-            d += 6;
+            g2.setStroke(new BasicStroke(1.3f));
+            if(i%5==0)
+            {
+                g2.drawLine(r + x + x1,r + y - y1, r+x+(int) (r  * Math.sin(rad * d)),r+y-(int) (r * Math.cos(rad * d)));
+                d += 6;
+            }
+            else {
+                g.drawString(".", r + x + x1, r + y - y1);
+                d += 6;
+            }
         }
         // 显示时间
         Calendar now1 = new GregorianCalendar();
