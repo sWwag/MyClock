@@ -10,7 +10,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 
-
 @SuppressWarnings("SpellCheckingInspection")
 public class MainFrame extends JFrame
 {
@@ -28,9 +27,8 @@ public class MainFrame extends JFrame
     private  int MIN;//下拉框中的时间
     private final String[][] str= new String[100][2];
 
-    static Player player = null;
+
     private final String path ="D:\\MyClock\\时间记录.txt";
-    private final String music ="D:\\MyClock\\大鱼.mp3";
 
     //ctor
     public MainFrame()
@@ -69,6 +67,7 @@ public class MainFrame extends JFrame
             //System.out.println("111");
         });
         timer.start();
+        //play();
     }
     //设置图标
     private void setIcon()
@@ -84,77 +83,81 @@ public class MainFrame extends JFrame
         }
     }
 
-    public void play()
-    {
-        new Thread(() ->
-        {
-            try {
-                File file = new File(music);
-                FileInputStream fis = new FileInputStream(file);
-                BufferedInputStream stream = new BufferedInputStream(fis);
-                player = new Player(stream);
-                player.play();
-            }
-            catch (Exception e)
-            {
-                // TODO: handle exception
-            }
-        }).start();
-        new Thread(()->
-        {
-            try
-            {
-                Thread.sleep(5000);
-            }
-            catch (InterruptedException e)
-            {
-                e.printStackTrace();
-            }
-            finally
-            {
-                player.close();
-            }
-        });
-    }
+//    static Player player;
+//    public void play() {
+//        new Thread(() ->
+//        {
+//            try
+//            {
+//                File file = new File(music);
+//                FileInputStream fis = new FileInputStream(file);
+//                BufferedInputStream stream = new BufferedInputStream(fis);
+//                player = new Player(stream);
+//                player.play();
+//            }
+//            catch (Exception e)
+//            {
+//                // TODO: handle exception
+//            }
+//        }).start();
+//        try
+//        {
+//            Thread.sleep(20000);
+//        }
+//        catch (InterruptedException e)
+//        {
+//            e.printStackTrace();
+//        }
+//        player.close();
+//    }
+
+    boolean isPrompt=false;
     //弹窗提醒
     public void prompt()
    {
-        Calendar now1 = new GregorianCalendar();
-        int a, b;
-        a = now1.get(Calendar.HOUR_OF_DAY);
-        b = now1.get(Calendar.MINUTE);
+       if(!isPrompt)
+       {
+           isPrompt = true;
 
-        try (FileReader reader = new FileReader(path); BufferedReader br = new BufferedReader(reader))
-        {
-            String line;
-            String[][] str= new String[100][2];
-            int i =0;
-            while ((line = br.readLine()) != null)
-            {
-                int j =0;
-                StringTokenizer st = new StringTokenizer(line,":");
-                while (st.hasMoreTokens())
-                {
-                    str[i][j]=st.nextToken();
-                    j++;
-                }
-                if (a==Integer.parseInt(str[i][0]) && b==Integer.parseInt(str[i][1]))
-                {
-                    if(checkBox.isSelected())
-                    {
-                        play();
-                        player.close();
-                    }
-                    JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
-                }
-                i++;
-                j = 0;
-            }
-        }
-        catch (IOException z)
-        {
-            z.printStackTrace();
-        }
+           Calendar now1 = new GregorianCalendar();
+           int a, b;
+           a = now1.get(Calendar.HOUR_OF_DAY);
+           b = now1.get(Calendar.MINUTE);
+
+           try (FileReader reader = new FileReader(path); BufferedReader br = new BufferedReader(reader)) {
+               String line;
+               String[][] str = new String[100][2];
+               int i = 0;
+               while ((line = br.readLine()) != null) {
+                   int j = 0;
+                   StringTokenizer st = new StringTokenizer(line, ":");
+                   while (st.hasMoreTokens()) {
+                       str[i][j] = st.nextToken();
+                       j++;
+                   }
+                   if (a == Integer.parseInt(str[i][0]) && b == Integer.parseInt(str[i][1])) {
+
+                       if (checkBox.isSelected()) {
+                           PlayerManager.play();
+                       }
+                       new Thread(() -> {
+                           JOptionPane.showMessageDialog(null, "时间到了！！！", "到时提醒", JOptionPane.INFORMATION_MESSAGE);
+                           PlayerManager.stop();
+
+                       }).start();
+
+                   }
+                   i++;
+                   j = 0;
+
+               }
+           } catch (IOException z) {
+               z.printStackTrace();
+           }
+           finally {
+               isPrompt=false;
+           }
+       }
     }
     //闹钟显现
     @Override
