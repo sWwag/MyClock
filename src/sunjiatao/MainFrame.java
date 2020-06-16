@@ -1,13 +1,10 @@
 package sunjiatao;
 
-import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -97,13 +94,27 @@ public class MainFrame extends JFrame
                 BufferedInputStream stream = new BufferedInputStream(fis);
                 player = new Player(stream);
                 player.play();
-                Thread.sleep(5000);
-                player.close();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 // TODO: handle exception
             }
         }).start();
-
+        new Thread(()->
+        {
+            try
+            {
+                Thread.sleep(5000);
+            }
+            catch (InterruptedException e)
+            {
+                e.printStackTrace();
+            }
+            finally
+            {
+                player.close();
+            }
+        });
     }
     //弹窗提醒
     public void prompt()
@@ -132,13 +143,9 @@ public class MainFrame extends JFrame
                     if(checkBox.isSelected())
                     {
                         play();
-                        JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
-                        //player.close();
+                        player.close();
                     }
-                    else
-                    {
-                        JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
-                    }
+                    JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
                 }
                 i++;
                 j = 0;
