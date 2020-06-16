@@ -42,13 +42,13 @@ public class MainFrame extends JFrame
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setTitle("闹钟");
         setIcon();
-
         compositeControls();
         getTime();
         setVisible(true);
         setLocation(500,200);
 
         Timer timer =new Timer(1000, e -> {
+            //getTime();
             s += 6;                // 秒针每次走6°
             if (s >= 360)
             {
@@ -69,7 +69,7 @@ public class MainFrame extends JFrame
             //paintClock(g);
             repaint();     // 重新绘制
             prompt();       //将闹钟加入到线程当中
-            System.out.println("111");
+            //System.out.println("111");
         });
         timer.start();
     }
@@ -154,89 +154,98 @@ public class MainFrame extends JFrame
     public void paint(Graphics g) {
         super.paint(g);
 
-        g.setColor(Color.black);//画笔颜色
+        g.setColor(Color.black);
         Graphics2D g2=(Graphics2D)g;
         g2.setColor(Color.black);
         int x = 100;
         int y = 100;
         int r = 100;
-        g2.drawOval(x, y, r * 2, r * 2);
-        // 秒针
         double rad = Math.PI / 180;
+       // g.drawOval(x, y, r * 2, r * 2);
+
+
+        // 秒针
         int x1 = (int) (90 * Math.sin(rad * s));
         int y1 = (int) (90 * Math.cos(rad * s));
-        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);/* drawLine(a,b,c,d) (a,b)为起始坐标 (c,d)为终点坐标 */
+        g.drawLine(r+x, y+r, r+x + x1, r +y- y1);
+
+
         // 分针
         x1 = (int) (80 * Math.sin(rad * m));
         y1 = (int) (80 * Math.cos(rad * m));
-        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);
+        g2.setStroke(new BasicStroke(1.5f));
+        g2.drawLine(r+x, r+y, r +x+ x1, r+y - y1);
+
         // 时针
         x1 = (int) (60 * Math.sin(rad * h));
         y1 = (int) (60 * Math.cos(rad * h));
-        g2.setStroke(new BasicStroke(2.0f));
-        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);
+        g2.setStroke(new BasicStroke(2f));
+        g2.drawLine(r+x, r+y, r+x + x1, r +y- y1);
+
         // 画数字
         int d = 30;
-        for (int i = 1; i <= 12; i++)
-        {
+        for (int i = 1; i <= 12; i++) {
             x1 = (int) ((r - 10) * Math.sin(rad * d));
             y1 = (int) ((r - 10) * Math.cos(rad * d));
-            g.drawString(String.valueOf(i), r + x + x1, r + y - y1);    //字符型的数据才能画
-            d+=30;
+            if(i<10) {
+                g.drawString(String.valueOf(i), r + x + x1, r + y - y1);
+                d += 30;
+            }
+            else
+            {
+                g.drawString(String.valueOf(i), r + x + x1, r + y - y1);
+                d += 30;
+            }
         }
+
         // 画刻度
         d = 0;
-        for (int i = 1; i <= 60; i++)
-        {
+        for (int i = 1; i <= 60; i++) {
             x1 = (int) ((r - 2) * Math.sin(rad * d));
             y1 = (int) ((r - 2) * Math.cos(rad * d));
-            g2.drawString(".", r + x + x1, r + y - y1);      //画的是点，表示刻度
+            g.drawString(".", r+x + x1, r +y- y1);
             d += 6;
         }
-        //获取时间
+        // 显示时间
         Calendar now1 = new GregorianCalendar();
-        int a,b,c;
+        int a, b, c;
         a = now1.get(Calendar.HOUR_OF_DAY);
         b = now1.get(Calendar.MINUTE);
         c = now1.get(Calendar.SECOND);
-        g2.drawString(String.format("%02d",a) + ":" + String.format("%02d",b) + ":" + String.format("%02d",c), 175, 330);
-        g2.drawString("全部闹钟：",100,350);
+        g.drawString(a+ ":" + b + ":" + c, 175, 330);
+        g.drawString("全部闹钟：",100,350);
+
         try (FileReader reader = new FileReader(path);
-             BufferedReader br = new BufferedReader(reader)) // 建立一个对象，它把文件内容转成计算机能读懂的语言
-        {
+             BufferedReader br = new BufferedReader(reader)
+        ) {
             String line;
 
             int i =0;
-            while ((line = br.readLine()) != null)
-            {
+            while ((line = br.readLine()) != null) {
                 int j =0;
                 StringTokenizer st = new StringTokenizer(line, ":");
-                while (st.hasMoreTokens())
-                {
+                while (st.hasMoreTokens()){
                     str[i][j]=st.nextToken();
                     j++;
                 }
                 g.drawString(str[i][0]+":"+str[i][1]+"\n",180+(i/10)*70,350+15*(i-(i/10)*10));
-                //addClockButton.setText(str[i][0]+":"+str[i][1]+"\n");
-                //System.out.print(str[i][0]+":"+str[i][1]);
-                //System.out.println();
                 i++;
                 j = 0;
             }
-        }
-        catch (IOException z)
-        {
+        } catch (IOException z) {
             z.printStackTrace();
         }
+
     }
 
     //初始化
     public void getTime()
     {
         Calendar now =new GregorianCalendar();
-        s=now.get(Calendar.HOUR_OF_DAY)*6;
+        s=now.get(Calendar.SECOND)*6;
         m = now.get(Calendar.MINUTE) * 6;
         h = now.get(Calendar.HOUR) * 30 + now.get(Calendar.MINUTE) / 12 * 6;
+
     }
     //文件读取
     public void getClocksFromFile()
