@@ -1,0 +1,88 @@
+Index: src/sunjiatao/MainFrame.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package sunjiatao;\r\n\r\nimport javazoom.jl.decoder.JavaLayerException;\r\nimport javazoom.jl.player.Player;\r\n\r\nimport javax.imageio.ImageIO;\r\nimport javax.swing.*;\r\nimport java.awt.*;\r\nimport java.awt.event.ActionEvent;\r\nimport java.awt.event.ActionListener;\r\nimport java.io.*;\r\nimport java.util.Calendar;\r\nimport java.util.GregorianCalendar;\r\nimport java.util.StringTokenizer;\r\n\r\n\r\n@SuppressWarnings(\"SpellCheckingInspection\")\r\npublic class MainFrame extends JFrame\r\n{\r\n    private static final int DEFAULT_WIDTH = 400;\r\n    private static final int DEFAULT_HEIGHT = 600;\r\n\r\n    private JComboBox<String> hourBox=new JComboBox<>();\r\n    private JComboBox<String> minBox=new JComboBox<>();\r\n    private final JButton addClockButton =new JButton(\"添加闹钟\");\r\n    private final JButton deleteClockButton = new JButton(\"删除闹钟\");\r\n    private final JCheckBox checkBox =new JCheckBox(\"铃声提醒\");\r\n\r\n    private int h,m,s;\r\n    private  int HOUR;\r\n    private  int MIN;//下拉框中的时间\r\n    private final String[][] str= new String[100][2];\r\n\r\n    static Player player = null;\r\n    private final String path =\"D:\\\\MyClock\\\\时间记录.txt\";\r\n    private final String music =\"D:\\\\MyClock\\\\大鱼.mp3\";\r\n\r\n    //ctor\r\n    public MainFrame()\r\n    {\r\n        setSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);\r\n        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);\r\n        setTitle(\"闹钟\");\r\n        setIcon();\r\n\r\n        compositeControls();\r\n        getTime();\r\n        setVisible(true);\r\n        setLocation(500,200);\r\n\r\n        Timer timer =new Timer(1000, e -> {\r\n            s += 6;                // 秒针每次走6°\r\n            if (s >= 360)\r\n            {\r\n                s = 0;            // 秒针归零\r\n                m += 6;\r\n                if (m == 72 || m == 144 || m == 288)\r\n                {\r\n                    h += 6;                // 分针走72°，时针走6° 分针的12倍，时针走一次\r\n                }\r\n                if (m >= 360) {\r\n                    m = 0;                // 分针归零\r\n                    h += 6;\r\n                }\r\n                if (h >= 360) {\r\n                    h = 0;                // 时针归零\r\n                }\r\n            }\r\n            //paintClock(g);\r\n            repaint();     // 重新绘制\r\n            prompt();       //将闹钟加入到线程当中\r\n            System.out.println(\"111\");\r\n        });\r\n        timer.start();\r\n    }\r\n    //设置图标\r\n    private void setIcon()\r\n    {\r\n        try\r\n        {\r\n            Image img = ImageIO.read(this.getClass().getResource(\"闹钟.jpg\"));\r\n            this.setIconImage(img);\r\n        }\r\n        catch (IOException e)\r\n        {\r\n            //System.out.println(\"sjthhh\");\r\n        }\r\n    }\r\n\r\n    public void play()\r\n    {\r\n        new Thread(() ->\r\n        {\r\n            try {\r\n                File file = new File(music);\r\n                FileInputStream fis = new FileInputStream(file);\r\n                BufferedInputStream stream = new BufferedInputStream(fis);\r\n                player = new Player(stream);\r\n                player.play();\r\n                Thread.sleep(5000);\r\n                player.close();\r\n            } catch (Exception e) {\r\n                // TODO: handle exception\r\n            }\r\n        }).start();\r\n\r\n    }\r\n    //弹窗提醒\r\n    public void prompt()\r\n   {\r\n        Calendar now1 = new GregorianCalendar();\r\n        int a, b;\r\n        a = now1.get(Calendar.HOUR_OF_DAY);\r\n        b = now1.get(Calendar.MINUTE);\r\n\r\n        try (FileReader reader = new FileReader(path); BufferedReader br = new BufferedReader(reader))\r\n        {\r\n            String line;\r\n            String[][] str= new String[100][2];\r\n            int i =0;\r\n            while ((line = br.readLine()) != null)\r\n            {\r\n                int j =0;\r\n                StringTokenizer st = new StringTokenizer(line,\":\");\r\n                while (st.hasMoreTokens())\r\n                {\r\n                    str[i][j]=st.nextToken();\r\n                    j++;\r\n                }\r\n                if (a==Integer.parseInt(str[i][0]) && b==Integer.parseInt(str[i][1]))\r\n                {\r\n                    if(checkBox.isSelected())\r\n                    {\r\n                        play();\r\n                        JOptionPane.showMessageDialog(null,\"时间到了！！！\",\"到时提醒\",JOptionPane.INFORMATION_MESSAGE);\r\n                        //player.close();\r\n                    }\r\n                    else\r\n                    {\r\n                        JOptionPane.showMessageDialog(null,\"时间到了！！！\",\"到时提醒\",JOptionPane.INFORMATION_MESSAGE);\r\n                    }\r\n                }\r\n                i++;\r\n                j = 0;\r\n            }\r\n        }\r\n        catch (IOException z)\r\n        {\r\n            z.printStackTrace();\r\n        }\r\n    }\r\n    //闹钟显现\r\n    @Override\r\n    public void paint(Graphics g) {\r\n        super.paint(g);\r\n\r\n        g.setColor(Color.black);//画笔颜色\r\n        Graphics2D g2=(Graphics2D)g;\r\n        g2.setColor(Color.black);\r\n        int x = 100;\r\n        int y = 100;\r\n        int r = 100;\r\n        g2.drawOval(x, y, r * 2, r * 2);\r\n        // 秒针\r\n        double rad = Math.PI / 180;\r\n        int x1 = (int) (90 * Math.sin(rad * s));\r\n        int y1 = (int) (90 * Math.cos(rad * s));\r\n        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);/* drawLine(a,b,c,d) (a,b)为起始坐标 (c,d)为终点坐标 */\r\n        // 分针\r\n        x1 = (int) (80 * Math.sin(rad * m));\r\n        y1 = (int) (80 * Math.cos(rad * m));\r\n        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);\r\n        // 时针\r\n        x1 = (int) (60 * Math.sin(rad * h));\r\n        y1 = (int) (60 * Math.cos(rad * h));\r\n        g2.setStroke(new BasicStroke(2.0f));\r\n        g2.drawLine(r + x, r + y, r + x + x1, r + y - y1);\r\n        // 画数字\r\n        int d = 30;\r\n        for (int i = 1; i <= 12; i++)\r\n        {\r\n            x1 = (int) ((r - 10) * Math.sin(rad * d));\r\n            y1 = (int) ((r - 10) * Math.cos(rad * d));\r\n            g.drawString(String.valueOf(i), r + x + x1, r + y - y1);    //字符型的数据才能画\r\n            d+=30;\r\n        }\r\n        // 画刻度\r\n        d = 0;\r\n        for (int i = 1; i <= 60; i++)\r\n        {\r\n            x1 = (int) ((r - 2) * Math.sin(rad * d));\r\n            y1 = (int) ((r - 2) * Math.cos(rad * d));\r\n            g2.drawString(\".\", r + x + x1, r + y - y1);      //画的是点，表示刻度\r\n            d += 6;\r\n        }\r\n        //获取时间\r\n        Calendar now1 = new GregorianCalendar();\r\n        int a,b,c;\r\n        a = now1.get(Calendar.HOUR_OF_DAY);\r\n        b = now1.get(Calendar.MINUTE);\r\n        c = now1.get(Calendar.SECOND);\r\n        g2.drawString(String.format(\"%02d\",a) + \":\" + String.format(\"%02d\",b) + \":\" + String.format(\"%02d\",c), 175, 330);\r\n        g2.drawString(\"全部闹钟：\",100,350);\r\n        try (FileReader reader = new FileReader(path);\r\n             BufferedReader br = new BufferedReader(reader)) // 建立一个对象，它把文件内容转成计算机能读懂的语言\r\n        {\r\n            String line;\r\n\r\n            int i =0;\r\n            while ((line = br.readLine()) != null)\r\n            {\r\n                int j =0;\r\n                StringTokenizer st = new StringTokenizer(line, \":\");\r\n                while (st.hasMoreTokens())\r\n                {\r\n                    str[i][j]=st.nextToken();\r\n                    j++;\r\n                }\r\n                g.drawString(str[i][0]+\":\"+str[i][1]+\"\\n\",180+(i/10)*70,350+15*(i-(i/10)*10));\r\n                //addClockButton.setText(str[i][0]+\":\"+str[i][1]+\"\\n\");\r\n                //System.out.print(str[i][0]+\":\"+str[i][1]);\r\n                //System.out.println();\r\n                i++;\r\n                j = 0;\r\n            }\r\n        }\r\n        catch (IOException z)\r\n        {\r\n            z.printStackTrace();\r\n        }\r\n    }\r\n\r\n    //初始化\r\n    public void getTime()\r\n    {\r\n        Calendar now =new GregorianCalendar();\r\n        s=now.get(Calendar.HOUR_OF_DAY)*6;\r\n        m = now.get(Calendar.MINUTE) * 6;\r\n        h = now.get(Calendar.HOUR) * 30 + now.get(Calendar.MINUTE) / 12 * 6;\r\n    }\r\n    //文件读取\r\n    public void getClocksFromFile()\r\n    {\r\n        try(FileReader reader=new FileReader(path);\r\n            BufferedReader bufferedReader =new BufferedReader(reader))\r\n        {\r\n            String line;\r\n            int i=0;\r\n            while((line=bufferedReader.readLine())!=null)\r\n            {\r\n                int j=0;\r\n                StringTokenizer st = new StringTokenizer(line, \":\");\r\n                while (st.hasMoreTokens())\r\n                {\r\n                    str[i][j]=st.nextToken();\r\n                    j++;\r\n                }\r\n                //System.out.print(str[i][0]+\":\"+str[i][1]);\r\n                //System.out.println();\r\n                i++;\r\n                j=0;\r\n            }\r\n        }\r\n        catch (IOException e)\r\n        {\r\n            e.printStackTrace();\r\n        }\r\n    }\r\n    //闹钟从txt写入\r\n    public void writeClockToFile()\r\n    {\r\n        HOUR = hourBox.getSelectedIndex();\r\n        MIN = minBox.getSelectedIndex();\r\n        try(FileWriter writer =new FileWriter(path,true);\r\n            BufferedWriter out =new BufferedWriter(writer))\r\n        {\r\n            out.write(String.format(\"%02d\",HOUR) + \":\" + String.format(\"%02d\",MIN) + \"\\r\\n\");\r\n            out.flush();\r\n            System.out.println(\"had added\");\r\n            JOptionPane.showMessageDialog(null,\"闹钟添加成功！\",\"添加闹钟提醒\",JOptionPane.INFORMATION_MESSAGE);\r\n        }\r\n        catch (IOException e)\r\n        {\r\n            e.printStackTrace();\r\n        }\r\n\r\n    }\r\n    //闹钟从txt删除\r\n    public void deleteClockFromFile()\r\n    {\r\n        HOUR = hourBox.getSelectedIndex();\r\n        MIN = minBox.getSelectedIndex();\r\n        try(FileWriter writer =new FileWriter(path);//没有append：true，表示重新写\r\n            BufferedWriter out =new BufferedWriter(writer))\r\n        {\r\n            getClocksFromFile();\r\n            for (int i = 0; i < 100; i++)\r\n            {\r\n                if (Integer.parseInt(str[i][0])==HOUR && Integer.parseInt(str[i][1])==MIN)\r\n                {\r\n                }\r\n                else\r\n                {\r\n                    out.write(str[i][0]+\":\"+str[i][1]+\"\\r\\n\");\r\n                }\r\n            }\r\n            out.flush();\r\n        }\r\n        catch (IOException e)\r\n        {\r\n            e.printStackTrace();\r\n        }\r\n        catch (NumberFormatException e)\r\n        {\r\n            System.out.println(\"had deleted\");\r\n            JOptionPane.showMessageDialog(null,\"该闹钟已删除！\",\"删除闹钟提醒\",JOptionPane.INFORMATION_MESSAGE);\r\n        }\r\n    }\r\n    //绘制控件\r\n    public void compositeControls()\r\n    {\r\n        JPanel panel=new JPanel();\r\n        this.getContentPane().add(panel);\r\n\r\n        //设置小时下拉框\r\n        String[] hours = new String[24];\r\n        for (int i = 0; i < hours.length; i++)\r\n        {\r\n            hours[i]=i+\"\";\r\n        }\r\n        hourBox= new JComboBox<>(hours);\r\n        hourBox.setSize(50,40);\r\n        panel.add(hourBox);\r\n\r\n        //设置分钟下拉框\r\n        String[] mins = new String[60];\r\n        for (int i = 0; i < mins.length; i++)\r\n        {\r\n            mins[i]=i+\"\";\r\n        }\r\n        minBox=new JComboBox<>(mins);\r\n        minBox.setSize(50,40);\r\n        panel.add(minBox);\r\n\r\n        //添加按钮\r\n        addClockButton.setSize(50,40);\r\n        addClockButton.addActionListener(e -> {\r\n            HOUR= hourBox.getSelectedIndex();\r\n            MIN = minBox.getSelectedIndex();\r\n            writeClockToFile();\r\n            getClocksFromFile();\r\n        });\r\n        panel.add(addClockButton);\r\n\r\n        //删除按钮\r\n        deleteClockButton.setSize(50,40);\r\n        deleteClockButton.addActionListener(e -> {\r\n            deleteClockFromFile();\r\n            getClocksFromFile();\r\n        });\r\n        panel.add(deleteClockButton);\r\n\r\n        //铃声复选框\r\n        panel.add(checkBox);\r\n        panel.validate();\r\n        this.add(panel);\r\n    }\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/sunjiatao/MainFrame.java	(revision 1e3f2424f66165b384948afd7869f47379440ea7)
++++ src/sunjiatao/MainFrame.java	(date 1592277274881)
+@@ -1,13 +1,10 @@
+ package sunjiatao;
+ 
+-import javazoom.jl.decoder.JavaLayerException;
+ import javazoom.jl.player.Player;
+ 
+ import javax.imageio.ImageIO;
+ import javax.swing.*;
+ import java.awt.*;
+-import java.awt.event.ActionEvent;
+-import java.awt.event.ActionListener;
+ import java.io.*;
+ import java.util.Calendar;
+ import java.util.GregorianCalendar;
+@@ -44,7 +41,7 @@
+         setIcon();
+ 
+         compositeControls();
+-        getTime();
++
+         setVisible(true);
+         setLocation(500,200);
+ 
+@@ -72,6 +69,7 @@
+             System.out.println("111");
+         });
+         timer.start();
++        getTime();
+     }
+     //设置图标
+     private void setIcon()
+@@ -97,13 +95,27 @@
+                 BufferedInputStream stream = new BufferedInputStream(fis);
+                 player = new Player(stream);
+                 player.play();
+-                Thread.sleep(5000);
+-                player.close();
+-            } catch (Exception e) {
++            }
++            catch (Exception e)
++            {
+                 // TODO: handle exception
+             }
+         }).start();
+-
++        new Thread(()->
++        {
++            try
++            {
++                Thread.sleep(5000);
++            }
++            catch (InterruptedException e)
++            {
++                e.printStackTrace();
++            }
++            finally
++            {
++                player.close();
++            }
++        });
+     }
+     //弹窗提醒
+     public void prompt()
+@@ -132,13 +144,9 @@
+                     if(checkBox.isSelected())
+                     {
+                         play();
+-                        JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
+-                        //player.close();
++                        player.close();
+                     }
+-                    else
+-                    {
+-                        JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
+-                    }
++                    JOptionPane.showMessageDialog(null,"时间到了！！！","到时提醒",JOptionPane.INFORMATION_MESSAGE);
+                 }
+                 i++;
+                 j = 0;
