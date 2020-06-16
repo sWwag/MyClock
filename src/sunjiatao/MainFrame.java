@@ -168,7 +168,7 @@ public class MainFrame extends JFrame
         int y = 100;
         int r = 100;
         double rad = Math.PI / 180;
-       // g.drawOval(x, y, r * 2, r * 2);
+        g.drawOval(x, y, r * 2, r * 2);
 
 
         // 秒针
@@ -207,7 +207,7 @@ public class MainFrame extends JFrame
 
         // 画刻度
         d = 0;
-        for (int i = 1; i <= 60; i++) {
+        for (int i = 0; i < 60; i++) {
             x1 = (int) ((r - 2) * Math.sin(rad * d));
             y1 = (int) ((r - 2) * Math.cos(rad * d));
             g.drawString(".", r+x + x1, r +y- y1);
